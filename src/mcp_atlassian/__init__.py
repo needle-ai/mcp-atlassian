@@ -6,6 +6,11 @@ import click
 from dotenv import load_dotenv
 
 from .utils.logging import setup_logging
+# Import directly to avoid circular imports
+from .jira.client import JiraClient
+from .jira.config import JiraConfig
+# Import JiraFetcher directly from jira module instead of forward-declaring
+from .jira import JiraFetcher
 
 __version__ = "0.8.3"
 
@@ -16,7 +21,6 @@ if os.getenv("MCP_VERBOSE", "").lower() in ("true", "1", "yes"):
 
 # Set up logging using the utility function
 logger = setup_logging(logging_level)
-
 
 @click.command()
 @click.option(
@@ -200,13 +204,15 @@ def main(
     if jira_projects_filter:
         os.environ["JIRA_PROJECTS_FILTER"] = jira_projects_filter
 
+    # Import locally to avoid circular imports
     from . import server
+    from .jira.server import create_jira_server
 
     # Run the server with specified transport
     asyncio.run(server.run_server(transport=final_transport, port=final_port))
 
 
-__all__ = ["main", "server", "__version__"]
+__all__ = ["main", "server", "__version__", "JiraFetcher", "JiraClient", "JiraConfig", "create_jira_server"]
 
 if __name__ == "__main__":
     main()

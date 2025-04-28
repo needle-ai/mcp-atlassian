@@ -11,8 +11,23 @@ from mcp.types import TextContent, Tool
 
 from .confluence import ConfluenceFetcher
 from .confluence.config import ConfluenceConfig
-from .jira import JiraFetcher
+# Use direct import from the module to avoid circular imports
+from .jira.client import JiraClient
 from .jira.config import JiraConfig
+from .jira.comments import CommentsMixin
+from .jira.epics import EpicsMixin
+from .jira.fields import FieldsMixin
+from .jira.formatting import FormattingMixin
+from .jira.issues import IssuesMixin
+from .jira.links import LinksMixin
+from .jira.projects import ProjectsMixin
+from .jira.search import SearchMixin
+from .jira.sprints import SprintsMixin
+from .jira.transitions import TransitionsMixin
+from .jira.users import UsersMixin
+from .jira.worklog import WorklogMixin
+from .jira.boards import BoardsMixin
+from .jira.attachments import AttachmentsMixin
 from .utils.io import is_read_only_mode
 from .utils.logging import log_config_param
 from .utils.urls import is_atlassian_cloud_url
@@ -20,6 +35,29 @@ from .utils.urls import is_atlassian_cloud_url
 # Configure logging
 logger = logging.getLogger("mcp-atlassian")
 
+# Define a Fetcher class locally to avoid circular imports
+class JiraFetcher(
+    ProjectsMixin,
+    FieldsMixin,
+    FormattingMixin,
+    TransitionsMixin,
+    WorklogMixin,
+    EpicsMixin,
+    CommentsMixin,
+    SearchMixin,
+    IssuesMixin,
+    UsersMixin,
+    BoardsMixin,
+    SprintsMixin,
+    AttachmentsMixin,
+    LinksMixin,
+    JiraClient
+):
+    """
+    The main Jira client class providing access to all Jira operations.
+    This composes all mixins to create a full-featured client.
+    """
+    pass
 
 @dataclass
 class AppContext:
@@ -2100,7 +2138,7 @@ async def call_tool(name: str, arguments: Any) -> Sequence[TextContent]:
                 if attachments:
                     additional_fields["attachments"] = attachments
 
-                # Update the issue - directly pass fields to JiraFetcher.update_issue
+                # Update the issue - directly pass fields to JiraClient.update_issue
                 # instead of using fields as a parameter name
                 issue = ctx.jira.update_issue(
                     issue_key=issue_key, **fields, **additional_fields

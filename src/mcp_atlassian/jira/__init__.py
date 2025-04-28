@@ -5,12 +5,16 @@ This module provides various Jira API client implementations.
 
 # flake8: noqa
 
-# Re-export the Jira class for backward compatibility
+# Base client class
 from atlassian.jira import Jira
-
 from .client import JiraClient
-from .comments import CommentsMixin
 from .config import JiraConfig
+
+# Service classes and functions
+from .service import JiraService
+
+# Mixin classes - these are used for composition in Jira operation classes
+from .comments import CommentsMixin
 from .epics import EpicsMixin
 from .fields import FieldsMixin
 from .formatting import FormattingMixin
@@ -25,7 +29,7 @@ from .worklog import WorklogMixin
 from .boards import BoardsMixin
 from .attachments import AttachmentsMixin
 
-
+# Define a Fetcher class that composes all mixins
 class JiraFetcher(
     ProjectsMixin,
     FieldsMixin,
@@ -41,31 +45,23 @@ class JiraFetcher(
     SprintsMixin,
     AttachmentsMixin,
     LinksMixin,
+    JiraClient
 ):
     """
     The main Jira client class providing access to all Jira operations.
-
-    This class inherits from multiple mixins that provide specific functionality:
-    - ProjectsMixin: Project-related operations
-    - FieldsMixin: Field-related operations
-    - FormattingMixin: Content formatting utilities
-    - TransitionsMixin: Issue transition operations
-    - WorklogMixin: Worklog operations
-    - EpicsMixin: Epic operations
-    - CommentsMixin: Comment operations
-    - SearchMixin: Search operations
-    - IssuesMixin: Issue operations
-    - UsersMixin: User operations
-    - BoardsMixin: Board operations
-    - SprintsMixin: Sprint operations
-    - AttachmentsMixin: Attachment download operations
-    - LinksMixin: Issue link operations
-
-    The class structure is designed to maintain backward compatibility while
-    improving code organization and maintainability.
+    This composes all mixins to create a full-featured client.
     """
-
     pass
 
+# Import the server module last to avoid circular imports
+# This is just for exports, JiraFetcher is already available in this module
+from .server import create_jira_server
 
-__all__ = ["JiraFetcher", "JiraConfig", "JiraClient", "Jira"]
+__all__ = [
+    "JiraFetcher", 
+    "JiraClient", 
+    "JiraConfig", 
+    "JiraService", 
+    "create_jira_server",
+    "Jira"
+]
